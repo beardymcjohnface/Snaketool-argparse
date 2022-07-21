@@ -21,7 +21,6 @@ from time import localtime, strftime
 Read the version for printing.
 We also need BINDIR to find the other project files.
 """
-
 BINDIR = os.path.dirname(os.path.realpath(__file__))
 SNEKDIR = os.path.normpath(os.path.join(BINDIR, '../', 'workflow'))
 CONDDIR = os.path.normpath(os.path.join(SNEKDIR, 'conda'))
@@ -34,7 +33,6 @@ vFH.close()
 """PARSE ARGUMENTS
 Customise your help message here!
 """
-
 parser = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter,
     description=("\n"
@@ -47,7 +45,7 @@ parser = argparse.ArgumentParser(
                  "    install     Download and install the databases or dependencies\n"
                  "    config      Copy the default configfile to the current directory\n"
                  "\n"),
-    epilog=  "Example usage: \n"
+    epilog=  ("Example usage: \n"
              "To Run {{ cookiecutter.project_name }}:\n"
              "{{ cookiecutter.project_slug }} run --infile file\n"
              "\n"
@@ -59,7 +57,7 @@ parser = argparse.ArgumentParser(
              "\n"
              "Install databases or dependencies:\n"
              "{{ cookiecutter.project_slug }} install \n"
-             "\n"
+             "\n")
 )
 
 
@@ -68,17 +66,15 @@ parser = argparse.ArgumentParser(
 Add and customise your commandline options.
 --infile and --outdir are simply passed as config options verbatim to Snakemake.
 You should keep --profile, --threads, --configfile, and --snake to make the most out of Snakemake.
---snakemake-defaults shows the user the default runtime args for Snakemake (and lets them customise them if they're 
-feeling brave).
+--snakemake-defaults lets the user override the default Snakemake options if they're feeling brave.
 """
-
 parser.add_argument('command', choices=['install', 'run', 'config'])
 parser.add_argument('--infile', help='Input file required for {{ cookiecutter.project_name }}')
-parser.add_argument('--outdir', help='Directory to write the output files', default='output.{{ cookiecutter.project_slug }}')
+parser.add_argument('--outdir', help='Directory to write the output files', default='output_{{ cookiecutter.project_slug }}')
 parser.add_argument('--profile', help='Snakemake profile for use on HPC cluster')
 parser.add_argument('--threads', help='Number of threads to use (ignored if using --profile)', default='8')
 parser.add_argument('--configfile',
-                    help='Specify your own config file. First copy the template with "{{ cookiecutter.project_slug }} config".',
+                    help='Specify a config file.',
                     default='{{ cookiecutter.project_slug }}.config.yaml')
 parser.add_argument('--snakemake-defaults',
                     help='Commandline options passed by default to Snakemake',
@@ -100,7 +96,6 @@ args = parser.parse_args()
 We need to know the out directory as that's where we create the runtime config file.
 We get the other files we need by their relative locations to this script.
 """
-
 OUTDIR = os.path.normpath(args.outdir)
 if not os.path.exists(OUTDIR):
     os.makedirs(OUTDIR)
@@ -115,7 +110,6 @@ updateConfig() function accordingly.
 install() as a guide on how to do this. Don't forget to add the new function to the commands dict at the bottom,
 and as a choice in the argument parser.
 """
-
 def msg(errMessage):
     """
     Pretty printing of STDERR messages
@@ -163,8 +157,7 @@ def writeConfig(_config):
         yaml.dump(_config, stream)
     msg('----------------------------')
     msg('| Runtime config settings: |')
-    msg('----------------------------')
-    msg('\n' + yaml.dump(_config, Dumper=yaml.Dumper) + '\n')
+    msg('----------------------------\n' + yaml.dump(_config, Dumper=yaml.Dumper))
     return runtimeConfig
 
 
@@ -208,8 +201,7 @@ def runSnakeSys(command):
     """
     msg(f'----------------------')
     msg(f'| Snakemake command: |')
-    msg(f'----------------------')
-    msg('\n' + command)
+    msg(f'----------------------\n' + command)
     if not subprocess.run(command.split()).returncode==0:
         exit(1)
     return None
@@ -248,7 +240,6 @@ The 'commands' dictionary:
     key = the argparse option
     value = the function to run
 """
-
 commands = {'install':install, 'run':run, 'config':copyConfig}
 commands[args.command]()
 
