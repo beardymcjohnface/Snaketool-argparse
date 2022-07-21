@@ -1,4 +1,4 @@
-{% set name = "{{cookiecutter.profile_slug}}" %}
+{% set name = "{{cookiecutter.project_slug}}" %}
 {% set version = "{{cookiecutter.version}}" %}
 
 package:
