@@ -7,6 +7,6 @@ the targets to declare. This example shows targets that are dependent on the inp
 allTargets = []
 
 if inputFile.endswith('.fasta'):
-    allTargets.append(os.path.join(outputDir, f'{inputFile}.fai'))
+    allTargets.append(outputPrefix + '.fai')
 else:
-    allTargets.append(os.path.join(outputDir, f'{inputFile}.touch'))
+    allTargets.append(outputPrefix + '.touch')
