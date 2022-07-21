@@ -1,7 +1,7 @@
 {
-  "full_name": "",
-  "email": "",
-  "github_username": "",
+  "full_name": "Michael Roach",
+  "email": "example@email.com",
+  "github_username": "gitUser",
   "project_name": "My Snaketool",
   "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}",
   "project_description": "Snakemake-powered commandline tool to do a thing.",
