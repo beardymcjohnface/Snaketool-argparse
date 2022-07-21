@@ -47,16 +47,16 @@ parser = argparse.ArgumentParser(
                  "\n"),
     epilog=  "Example usage: \n"
              "To Run {{ cookiecutter.project_name }}:\n"
-             "{{ cookiecutter.tool_name }} run --infile file\n"
+             "{{ cookiecutter.project_slug }} run --infile file\n"
              "\n"
              "To Run {{ cookiecutter.project_name }} on a cluster:\n"
-             "{{ cookiecutter.tool_name }} run --infile file --profile slurm\n"
+             "{{ cookiecutter.project_slug }} run --infile file --profile slurm\n"
              "\n"
              "Copy the default config to customise your analysis:\n"
-             "{{ cookiecutter.tool_name }} config \n"
+             "{{ cookiecutter.project_slug }} config \n"
              "\n"
              "Install databases or dependencies:\n"
-             "{{ cookiecutter.tool_name }} install \n"
+             "{{ cookiecutter.project_slug }} install \n"
              "\n"
 )
 
@@ -74,8 +74,8 @@ parser.add_argument('--outdir', help='Directory to write the output files', defa
 parser.add_argument('--profile', help='Snakemake profile for use on HPC cluster')
 parser.add_argument('--threads', help='Number of threads to use (ignored if using --profile)', default='8')
 parser.add_argument('--configfile',
-                    help='Specify your own config file. First copy the template with "{{ cookiecutter.tool_name }} config".',
-                    default='{{ cookiecutter.tool_name }}.config.yaml')
+                    help='Specify your own config file. First copy the template with "{{ cookiecutter.project_slug }} config".',
+                    default='{{ cookiecutter.project_slug }}.config.yaml')
 parser.add_argument('--snake',
                     help='Pass one or more commands to Snakemake e.g. --snake=--dry-run',
                     action='append')
