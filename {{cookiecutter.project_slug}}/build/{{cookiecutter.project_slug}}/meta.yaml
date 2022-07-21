@@ -26,7 +26,7 @@ requirements:
 
 test:
   commands:
-    - {{cookiecutter.profile_slug}} -h
+    - {{ name }} -h
 
 about:
   home: https://github.com/{{cookiecutter.github_username}}/{{ name }}
