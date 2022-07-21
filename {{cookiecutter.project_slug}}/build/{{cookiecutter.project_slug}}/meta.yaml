@@ -1,16 +1,16 @@
-{% set name = "{{cookiecutter.project_slug}}" %}
-{% set version = "{{cookiecutter.version}}" %}
+{% raw %}{% set name = "{% endraw %}{{ cookiecutter.project_slug }}{% raw %}" %}{% endraw %}
+{% raw %}{% set version = "{% endraw %}{{ cookiecutter.version }}{% raw %}" %}{% endraw %}
 
 package:
-  name: {{ name|lower }}
-  version: {{ version }}
+  name: {{'{{'}} name|lower {{'}}'}}
+  version: {{'{{'}} version {{'}}'}}
 
 build:
   number: 0
   noarch: generic
 
 source:
-  url: https://github.com/{{cookiecutter.github_username}}/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
+  url: https://github.com/{{cookiecutter.github_username}}/{{'{{'}} name {{'}}'}}/archive/refs/tags/v{{'{{'}} version {{'}}'}}.tar.gz
   sha256:
 
 requirements:
@@ -26,10 +26,10 @@ requirements:
 
 test:
   commands:
-    - {{ name }} -h
+    - {{'{{'}} name {{'}}'}} -h
 
 about:
-  home: https://github.com/{{cookiecutter.github_username}}/{{ name }}
+  home: https://github.com/{{cookiecutter.github_username}}/{{'{{'}} name {{'}}'}}
   license: {{cookiecutter.license}}
   license_file: LICENSE
   summary: {{cookiecutter.project_description}}
