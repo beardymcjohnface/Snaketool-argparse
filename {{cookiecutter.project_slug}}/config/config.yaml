@@ -1,1 +1,2 @@
-outdir: "output.{{ cookiecutter.project_slug }}"
+infile:
+outdir: "output_{{ cookiecutter.project_slug }}"

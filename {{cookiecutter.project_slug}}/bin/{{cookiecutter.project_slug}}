@@ -68,7 +68,7 @@ Add and customise your commandline options.
 You should keep --profile, --threads, --configfile, and --snake to make the most out of Snakemake.
 --snakemake-defaults lets the user override the default Snakemake options if they're feeling brave.
 """
-parser.add_argument('command', choices=['install', 'run', 'config'])
+parser.add_argument('command', choices=['run', 'install', 'config'])
 parser.add_argument('--infile', help='Input file required for {{ cookiecutter.project_name }}')
 parser.add_argument('--outdir', help='Directory to write the output files', default='output_{{ cookiecutter.project_slug }}')
 parser.add_argument('--profile', help='Snakemake profile for use on HPC cluster')
@@ -157,7 +157,7 @@ def writeConfig(_config):
         yaml.dump(_config, stream)
     msg('----------------------------')
     msg('| Runtime config settings: |')
-    msg('----------------------------\n' + yaml.dump(_config, Dumper=yaml.Dumper))
+    msg('----------------------------\n\n' + yaml.dump(_config, Dumper=yaml.Dumper))
     return runtimeConfig
 
 
@@ -201,7 +201,7 @@ def runSnakeSys(command):
     """
     msg(f'----------------------')
     msg(f'| Snakemake command: |')
-    msg(f'----------------------\n' + command)
+    msg(f'----------------------\n\n' + command + '\n')
     if not subprocess.run(command.split()).returncode==0:
         exit(1)
     return None
