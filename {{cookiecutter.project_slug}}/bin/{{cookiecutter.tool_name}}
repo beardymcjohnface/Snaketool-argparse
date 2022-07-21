@@ -1,0 +1,238 @@
+#!/usr/bin/env python3
+
+"""
+{{ cookiecutter.project_description }}.
+
+{% now 'local', '%Y' %}, {{ cookiecutter.full_name }}
+"""
+
+import argparse
+import sys
+import os
+import subprocess
+import time
+import yaml
+import hashlib
+from shutil import copyfile
+
+
+
+"""VERSION
+Read the version for printing.
+We also need BINDIR to find the other project files.
+"""
+
+BINDIR = os.path.dirname(os.path.realpath(__file__))
+vFH = open(os.path.join(BINDIR, '../', 'VERSION'), 'r')
+VERSION = vFH.readline()
+vFH.close()
+
+
+
+"""PARSE ARGUMENTS
+Customise your help message here!
+"""
+
+parser = argparse.ArgumentParser(
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    description=("\n"
+                 "{{ cookiecutter.project_name }}\n"
+                 "\n"
+                 f"\nVersion {VERSION}\n"
+                 "\n"
+                 "Subcommands:\n"
+                 "    run         Run {{ cookiecutter.project_name }}\n"
+                 "    install     Download and install the databases or dependencies\n"
+                 "    config      Copy the default configfile to the current directory\n"
+                 "\n"),
+    epilog=  "Example usage: \n"
+             "To Run {{ cookiecutter.project_name }}:\n"
+             "{{ cookiecutter.tool_name }} run --infile file\n"
+             "\n"
+             "To Run {{ cookiecutter.project_name }} on a cluster:\n"
+             "{{ cookiecutter.tool_name }} run --infile file --profile slurm\n"
+             "\n"
+             "Copy the default config to customise your analysis:\n"
+             "{{ cookiecutter.tool_name }} config \n"
+             "\n"
+             "Install databases or dependencies:\n"
+             "{{ cookiecutter.tool_name }} install \n"
+             "\n"
+)
+
+
+
+"""COMMAND LINE OPTIONS
+Add and customise your commandline options.
+You should keep --profile, --threads, --configfile, and --snake to make the most out of Snakemake.
+--infile and --outdir are simply passed as config options verbatim to Snakemake.
+"""
+
+parser.add_argument('command', choices=['install', 'run', 'config'])
+parser.add_argument('--infile', help='Input file required for {{ cookiecutter.project_name }}')
+parser.add_argument('--outdir', help='Directory to write the output files', default='output.{{ cookiecutter.project_slug }}')
+parser.add_argument('--profile', help='Snakemake profile for use on HPC cluster')
+parser.add_argument('--threads', help='Number of threads to use (ignored if using --profile)', default='8')
+parser.add_argument('--configfile',
+                    help='Specify your own config file. First copy the template with "{{ cookiecutter.tool_name }} config".',
+                    default='{{ cookiecutter.tool_name }}.config.yaml')
+parser.add_argument('--snake',
+                    help='Pass one or more commands to Snakemake e.g. --snake=--dry-run',
+                    action='append')
+args = parser.parse_args()
+
+
+
+"""DIRECTORIES ETC.
+We need to know the out directory as that's where we create the runtime config file.
+We get the other files we need by their relative locations to this script.
+"""
+
+OUTDIR = os.path.normpath(args.outdir)
+SNEKDIR = os.path.normpath(os.path.join(BINDIR, '../', 'workflow'))
+CONDDIR = os.path.normpath(os.path.join(SNEKDIR, 'conda'))
+if not os.path.exists(OUTDIR):
+    os.makedirs(OUTDIR)
+templateConfig = os.path.join(BINDIR, '../', 'config', 'config.yaml')
+
+
+
+"""FUNCTIONS
+-If you add or modify the commandline options to be passed to the main snakefile (run.smk), you will need to update the
+updateConfig() function accordingly.
+-If you add new subcommands (more Snakefiles) you will need to add functions to launch them; just use run() and
+install() as a guide on how to do this. Don't forget to add the new function to the commands dict at the bottom,
+and as a choice in the argument parser.
+"""
+
+def copyConfig():
+    """
+    Copy the system template config file to the --configfile declaration (working directory by default)
+    :return: None
+    """
+    if not os.path.isfile(args.configfile):
+        sys.stderr.write(f'    Copying template config file to {args.configfile}\n')
+        copyfile(templateConfig, args.configfile)
+    else:
+        sys.stderr.write(f"    Config file {args.configfile} already exists. Using existing config template.\n")
+    return None
+
+
+def updateConfig(_config):
+    """
+    Update config from config file with command-line config options
+    :param _config: config dictionary as read from config file
+    :return: config dictionary updated with command line options
+    """
+    _config['infile'] = args.infile
+    _config['outdir'] = args.outdir
+    return _config
+
+
+def writeConfig(_config):
+    """
+    Write the runtime config file for Snakemake after updating with the commandline options.
+    :param _config: updated configuration to write
+    :return: runtime config file name
+    """
+    confidMd5 = hashlib.md5(yaml.dump(_config, sort_keys=True).encode('utf-8')).hexdigest()
+    runtimeConfigName = 'infer_codons.' + confidMd5 + '.yaml'
+    runtimeConfig = os.path.normpath(os.path.join(OUTDIR, runtimeConfigName))
+    sys.stderr.write(f'    Writing runtime config file to {runtimeConfig}.\n')
+    with open(runtimeConfig, 'w') as stream:
+        yaml.dump(_config, stream)
+    sys.stderr.write('\n    Runtime config settings:\n')
+    sys.stderr.write(yaml.dump(_config, Dumper=yaml.Dumper) + '\n')
+    return runtimeConfig
+
+
+def generateRuntimeConfig():
+    """
+    Read in the config file (after checking and copying the system default), update, and write.
+    :return: runtime config file name
+    """
+    copyConfig()
+    with open(args.configfile, 'r') as stream:
+        config = yaml.safe_load(stream)
+    config = updateConfig(config)
+    if args.command in ['run', 'install']:
+        runtimeConfig = writeConfig(config)
+    return runtimeConfig
+
+
+def initialiseSnakeCommand():
+    """
+    Initialise the Snakemake command (add profile or threads args, default args, and additional snake args)
+    :return command: string for use with subprocess.run()
+    """
+    runtimeConfig = generateRuntimeConfig()
+    if args.profile:
+        runJobs = f'--profile {args.profile} '
+    else:
+        runJobs = f'-j {args.threads}'
+    command = (f'snakemake {runJobs} '
+               f'--configfile {runtimeConfig} '
+               '--rerun-incomplete '
+               '--printshellcmds '
+               '--nolock '
+               '--show-failed-logs '
+               '--use-conda '
+               '--conda-frontend {{ cookiecutter.conda_frontend }} '
+               f'--conda-prefix {CONDDIR} ')
+    if args.snake:
+        command = command + ' '.join(c for c in args.snake)
+    return command
+
+
+def runSnakeSys(command):
+    """
+    Function to run snakemake and confirm success
+    :param command: The snakemake command to run
+    :return: none
+    """
+    sys.stderr.write(f'    Running snakemake command:\n{command}\n')
+    if not subprocess.run(command.split()).returncode==0:
+        exit(1)
+    return None
+
+
+def install():
+    """
+    The install function. This will run the install.smk snakemake pipeline.
+    :return:
+    """
+    snakeCommand = initialiseSnakeCommand()
+    sys.stderr.write("    Checking and installing databases and/or dependencies for {{ cookiecutter.project_name }}\n")
+    snekFile = os.path.normpath(os.path.join(SNEKDIR, 'install.smk'))
+    runCommand = f'{snakeCommand} -s {snekFile}'
+    runSnakeSys(runCommand)
+    return None
+
+
+def run():
+    """
+    The run function. This will run the main run.smk snakemake pipeline.
+    :return:
+    """
+    snakeCommand = initialiseSnakeCommand()
+    sys.stderr.write("    Running {{ cookiecutter.project_name }}\n")
+    snekFile = os.path.normpath(os.path.join(SNEKDIR, 'run.smk'))
+    runCommand = (f'{snakeCommand} -s {snekFile} ')
+    runSnakeSys(runCommand)
+    return None
+
+
+
+"""RUN THE SUBCOMMAND
+Add any new subcommands here!
+The 'commands' dictionary:
+    key = the argparse option
+    value = the function to run
+"""
+
+commands = {'install':install, 'run':run, 'config':copyConfig}
+commands[args.command]()
+
+time.sleep(1)
+exit(0)
+

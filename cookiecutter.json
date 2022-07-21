@@ -1,0 +1,12 @@
+{
+  "full_name": "",
+  "email": "",
+  "github_username": "",
+  "project_name": "My Snaketool",
+  "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}",
+  "project_description": "Snakemake-powered commandline tool to do a thing.",
+  "version": "0.1.0",
+  "conda_frontend": ["conda","mamba"],
+  "create_author_file": "y",
+  "license": ["MIT license", "BSD license", "ISC license", "Apache Software License 2.0", "GNU General Public License v3", "Not open source"]
+}
