@@ -15,7 +15,7 @@ outputDir = config["outdir"]
 Declare some directories for pipeline intermediates and outputs.
 """
 stderrDir = os.path.join(outputDir, 'errorLogs')
-outputPrefix = os.path.join(outDir, os.path.basename(inputFile))
+outputPrefix = os.path.join(outputDir, os.path.basename(inputFile))
 
 
 
