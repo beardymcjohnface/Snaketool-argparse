@@ -21,7 +21,7 @@ for file in config['databaseFiles']:
 """RUN SNAKEMAKE"""
 rule all:
     input:
-        allDbFiles
+        allDatabaseFiles
 
 
 """RULES"""

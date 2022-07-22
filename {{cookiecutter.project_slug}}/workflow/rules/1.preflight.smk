@@ -27,7 +27,7 @@ onstart:
     if os.path.isdir(stderrDir):
         oldLogs = filter(re.compile(r'.*.log').match, os.listdir(stderrDir))
         for logfile in oldLogs:
-            os.unlink(os.path.join(STDERR, logfile))
+            os.unlink(os.path.join(stderrDir, logfile))
 
 onsuccess:
     """Print a success message"""

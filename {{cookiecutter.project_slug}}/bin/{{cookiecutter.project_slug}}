@@ -215,7 +215,7 @@ def runSnakeSys(command):
     :param command: The snakemake command to run
     :return: none
     """
-    msgBox('Snakemake command:', command)
+    msgBox('Snakemake command', command)
     if not subprocess.run(command.split()).returncode==0:
         exit(1)
     return None
