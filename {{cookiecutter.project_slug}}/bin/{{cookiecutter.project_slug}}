@@ -22,11 +22,19 @@ Read the version for printing.
 We also need BINDIR to find the other project files.
 """
 BINDIR = os.path.dirname(os.path.realpath(__file__))
-SNEKDIR = os.path.normpath(os.path.join(BINDIR, '../', 'workflow'))
-CONDDIR = os.path.normpath(os.path.join(SNEKDIR, 'conda'))
-vFH = open(os.path.join(BINDIR, '../', 'VERSION'), 'r')
+vFH = open(os.path.normpath(os.path.join(BINDIR, '../', 'VERSION')), 'r')
 VERSION = vFH.readline()
 vFH.close()
+SNEKDIR = os.path.normpath(os.path.join(BINDIR, '../', 'workflow'))
+CONDDIR = os.path.normpath(os.path.join(SNEKDIR, 'conda'))
+snakeDefaults = (
+    '--rerun-incomplete '
+    '--printshellcmds '
+    '--nolock '
+    '--show-failed-logs '
+    '--use-conda '
+    '--conda-frontend {{ cookiecutter.conda_frontend }} '
+    f'--conda-prefix {CONDDIR} ')
 
 
 
@@ -44,19 +52,23 @@ parser = argparse.ArgumentParser(
                  "    run         Run {{ cookiecutter.project_name }}\n"
                  "    install     Download and install the databases or dependencies\n"
                  "    config      Copy the default configfile to the current directory\n"
+                 "    test        Run the test dataset\n"
                  "\n"),
     epilog=  ("Example usage: \n"
              "To Run {{ cookiecutter.project_name }}:\n"
              "{{ cookiecutter.project_slug }} run --infile file\n"
              "\n"
-             "To Run {{ cookiecutter.project_name }} on a cluster:\n"
+             "Run on a cluster:\n"
              "{{ cookiecutter.project_slug }} run --infile file --profile slurm\n"
              "\n"
              "Copy the default config to customise your analysis:\n"
              "{{ cookiecutter.project_slug }} config \n"
              "\n"
-             "Install databases or dependencies:\n"
+             "Install databases/dependencies:\n"
              "{{ cookiecutter.project_slug }} install \n"
+             "\n"
+             "Run the test dataset:\n"
+             "{{ cookiecutter.project_slug }} test \n"
              "\n")
 )
 
@@ -68,25 +80,19 @@ Add and customise your commandline options.
 You should keep --profile, --threads, --configfile, and --snake to make the most out of Snakemake.
 --snakemake-defaults lets the user override the default Snakemake options if they're feeling brave.
 """
-parser.add_argument('command', choices=['run', 'install', 'config'])
+parser.add_argument('command', choices=['run', 'install', 'config', 'test'])
 parser.add_argument('--infile', help='Input file required for {{ cookiecutter.project_name }}')
 parser.add_argument('--outdir', help='Directory to write the output files', default='output_{{ cookiecutter.project_slug }}')
 parser.add_argument('--profile', help='Snakemake profile for use on HPC cluster')
 parser.add_argument('--threads', help='Number of threads to use (ignored if using --profile)', default='8')
 parser.add_argument('--configfile',
-                    help='Specify a config file.',
+                    help='Specify a config file. (default {{ cookiecutter.project_slug }}.config.yaml)',
                     default='{{ cookiecutter.project_slug }}.config.yaml')
 parser.add_argument('--snakemake-defaults',
-                    help='Commandline options passed by default to Snakemake',
-                    default=('--rerun-incomplete '
-                             '--printshellcmds '
-                             '--nolock '
-                             '--show-failed-logs '
-                             '--use-conda '
-                             '--conda-frontend {{ cookiecutter.conda_frontend }} '
-                             f'--conda-prefix {CONDDIR} '))
+                    help=f'Commandline options passed by default to Snakemake. (default {snakeDefaults})',
+                    default=snakeDefaults)
 parser.add_argument('--snake',
-                    help='Pass additional commands to Snakemake e.g. --snake=--dry-run',
+                    help='Pass additional commands to Snakemake e.g. --snake=--dry-run --snake=--forceall',
                     action='append')
 args = parser.parse_args()
 
@@ -99,7 +105,7 @@ We get the other files we need by their relative locations to this script.
 OUTDIR = os.path.normpath(args.outdir)
 if not os.path.exists(OUTDIR):
     os.makedirs(OUTDIR)
-templateConfig = os.path.join(BINDIR, '../', 'config', 'config.yaml')
+templateConfig = os.path.normpath(os.path.join(BINDIR, '../', 'config', 'config.yaml'))
 
 
 
@@ -107,7 +113,7 @@ templateConfig = os.path.join(BINDIR, '../', 'config', 'config.yaml')
 -If you add or modify the commandline options to be passed to the main snakefile (run.smk), you will need to update the
 updateConfig() function accordingly.
 -If you add new subcommands (more Snakefiles) you will need to add functions to launch them; just use run() and
-install() as a guide on how to do this. Don't forget to add the new function to the commands dict at the bottom,
+install() as a guide on how to do this. Don't forget to add the new function to the commands dictionary at the bottom,
 and as a choice in the argument parser.
 """
 def msg(errMessage):
@@ -118,6 +124,19 @@ def msg(errMessage):
     """
     tstamp = strftime('[%Y:%m:%d %H:%M:%S] ', localtime())
     sys.stderr.write(tstamp + errMessage + '\n')
+
+
+def msgBox(splash, errMessage):
+    """
+    Big, pretty STDERR messages
+    :param splash: short string to print in a box
+    :param errMessage: string to print below splash
+    :return:
+    """
+    msg('-' * (len(splash) + 4))
+    msg(f'| {splash} |')
+    msg(('-' * (len(splash) + 4)) + '\n' + errMessage)
+
 
 def copyConfig():
     """
@@ -155,9 +174,7 @@ def writeConfig(_config):
     msg(f'Writing runtime config file to {runtimeConfig}.')
     with open(runtimeConfig, 'w') as stream:
         yaml.dump(_config, stream)
-    msg('----------------------------')
-    msg('| Runtime config settings: |')
-    msg('----------------------------\n\n' + yaml.dump(_config, Dumper=yaml.Dumper))
+    msgBox('Runtime config settings', yaml.dump(_config, Dumper=yaml.Dumper))
     return runtimeConfig
 
 
@@ -199,9 +216,7 @@ def runSnakeSys(command):
     :param command: The snakemake command to run
     :return: none
     """
-    msg(f'----------------------')
-    msg(f'| Snakemake command: |')
-    msg(f'----------------------\n\n' + command + '\n')
+    msgBox('Snakemake command:', command)
     if not subprocess.run(command.split()).returncode==0:
         exit(1)
     return None
@@ -233,6 +248,17 @@ def run():
     return None
 
 
+def testRun():
+    """
+    Run the test dataset
+    :return: None
+    """
+    msg('Running the test dataset')
+    args.infile = os.path.normpath(os.path.join(BINDIR, 'test', 'test.fasta'))
+    run()
+    return None
+
+
 
 """RUN THE SUBCOMMAND
 Add any new subcommands here!
@@ -240,7 +266,7 @@ The 'commands' dictionary:
     key = the argparse option
     value = the function to run
 """
-commands = {'install':install, 'run':run, 'config':copyConfig}
+commands = {'install':install, 'run':run, 'config':copyConfig, 'test':testRun}
 commands[args.command]()
 
 exit(0)
