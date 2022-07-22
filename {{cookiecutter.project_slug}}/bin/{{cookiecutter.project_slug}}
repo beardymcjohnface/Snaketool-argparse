@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-{{ cookiecutter.project_description }}.
+{{ cookiecutter.project_description }}
 
 {% now 'local', '%Y' %}, {{ cookiecutter.full_name }}
 """
@@ -19,12 +19,16 @@ from time import localtime, strftime
 
 """VERSION
 Read the version for printing.
-We also need BINDIR to find the other project files.
 """
 BINDIR = os.path.dirname(os.path.realpath(__file__))
 vFH = open(os.path.normpath(os.path.join(BINDIR, '../', 'VERSION')), 'r')
 VERSION = vFH.readline()
 vFH.close()
+
+
+"""CONDA PREFIX
+Need to define the directory for installing conda envs before adding args.
+"""
 SNEKDIR = os.path.normpath(os.path.join(BINDIR, '../', 'workflow'))
 CONDDIR = os.path.normpath(os.path.join(SNEKDIR, 'conda'))
 snakeDefaults = (
@@ -35,7 +39,6 @@ snakeDefaults = (
     '--use-conda '
     '--conda-frontend {{ cookiecutter.conda_frontend }} '
     f'--conda-prefix {CONDDIR} ')
-
 
 
 """PARSE ARGUMENTS
@@ -73,7 +76,6 @@ parser = argparse.ArgumentParser(
 )
 
 
-
 """COMMAND LINE OPTIONS
 Add and customise your commandline options.
 --infile and --outdir are simply passed as config options verbatim to Snakemake.
@@ -97,7 +99,6 @@ parser.add_argument('--snake',
 args = parser.parse_args()
 
 
-
 """DIRECTORIES ETC.
 We need to know the out directory as that's where we create the runtime config file.
 We get the other files we need by their relative locations to this script.
@@ -106,7 +107,6 @@ OUTDIR = os.path.normpath(args.outdir)
 if not os.path.exists(OUTDIR):
     os.makedirs(OUTDIR)
 templateConfig = os.path.normpath(os.path.join(BINDIR, '../', 'config', 'config.yaml'))
-
 
 
 """FUNCTIONS
@@ -135,7 +135,7 @@ def msgBox(splash, errMessage):
     """
     msg('-' * (len(splash) + 4))
     msg(f'| {splash} |')
-    msg(('-' * (len(splash) + 4)) + '\n' + errMessage)
+    msg(('-' * (len(splash) + 4)) + '\n\n' + errMessage + '\n')
 
 
 def copyConfig():

@@ -10,5 +10,6 @@ cp -r bin/* "${PREFIX}/bin/"
 cp -r config/* "${PREFIX}/config/"
 cp -r workflow/* "${PREFIX}/workflow/"
 cp -r test/* "${PREFIX}/test/"
+cp LICENSE README.md VERSION "${PREFIX}/"
 
 {{cookiecutter.project_slug}} -h
