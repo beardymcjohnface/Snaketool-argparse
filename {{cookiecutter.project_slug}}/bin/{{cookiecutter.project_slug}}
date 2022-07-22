@@ -187,8 +187,7 @@ def generateRuntimeConfig():
     with open(args.configfile, 'r') as stream:
         config = yaml.safe_load(stream)
     config = updateConfig(config)
-    if args.command in ['run', 'install']:
-        runtimeConfig = writeConfig(config)
+    runtimeConfig = writeConfig(config)
     return runtimeConfig
 
 
@@ -254,7 +253,7 @@ def testRun():
     :return: None
     """
     msg('Running the test dataset')
-    args.infile = os.path.normpath(os.path.join(BINDIR, 'test', 'test.fasta'))
+    args.infile = os.path.normpath(os.path.join(BINDIR, '../', 'test', 'test.fasta'))
     run()
     return None
 
