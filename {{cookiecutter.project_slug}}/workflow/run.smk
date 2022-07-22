@@ -7,6 +7,12 @@
 This is the main Snakemake pipeline file.
 """
 
+"""CONFIGFILE
+Read in the system configfile is useful to fill in anything the user has accidentally deleted.
+"""
+configfile: os.path.join(workflow.basedir, "../", "config", "config.yaml")
+
+
 """ADD FUNCTIONS
 If your pipeline needs any Python functions, putting them in a separate file keeps things neat.
 """
