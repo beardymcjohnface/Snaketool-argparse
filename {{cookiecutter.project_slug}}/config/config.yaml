@@ -1,2 +1,3 @@
 infile:
 outdir: "output_{{ cookiecutter.project_slug }}"
+customDatabaseDirectory:

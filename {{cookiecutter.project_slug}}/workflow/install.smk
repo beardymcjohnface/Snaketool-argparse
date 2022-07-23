@@ -12,10 +12,17 @@ This is an auxiliary Snakefile to install databases or dependencies.
 configfile: os.path.join(workflow.basedir, '../', 'config', 'databases.yaml')
 
 
+"""CHECK IF CUSTOM DATABASE DIRECTORY"""
+if config['customDatabaseDirectory'] is None:
+    databaseDir = os.path.join(workflow.basedir, 'databases')
+else:
+    databaseDir = config['customDatabaseDirectory']
+
+
 """TARGETS"""
 allDatabaseFiles = []
 for file in config['databaseFiles']:
-    allDatabaseFiles.append(os.path.join(workflow.basedir, 'databases', file))
+    allDatabaseFiles.append(os.path.join(databaseDir, file))
 
 
 """RUN SNAKEMAKE"""
@@ -28,7 +35,7 @@ rule all:
 rule download_db_file:
     """Generic rule to download a database file."""
     output:
-        os.path.join(workflow.basedir, 'databases', '{file}')
+        os.path.join(databaseDir, '{file}')
     params:
         mirror = config['mirror']
     run:

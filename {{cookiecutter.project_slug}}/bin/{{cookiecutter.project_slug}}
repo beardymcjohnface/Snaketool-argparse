@@ -20,8 +20,8 @@ from time import localtime, strftime
 """VERSION
 Read the version for printing.
 """
-BINDIR = os.path.dirname(os.path.realpath(__file__))
-vFH = open(os.path.normpath(os.path.join(BINDIR, '../', 'VERSION')), 'r')
+binDir = os.path.dirname(os.path.realpath(__file__))
+vFH = open(os.path.normpath(os.path.join(binDir, '../', 'VERSION')), 'r')
 VERSION = vFH.readline()
 vFH.close()
 
@@ -29,8 +29,8 @@ vFH.close()
 """CONDA PREFIX
 Need to define the directory for installing conda envs before adding args.
 """
-SNEKDIR = os.path.normpath(os.path.join(BINDIR, '../', 'workflow'))
-CONDDIR = os.path.normpath(os.path.join(SNEKDIR, 'conda'))
+snakeDir = os.path.normpath(os.path.join(binDir, '../', 'workflow'))
+condaDir = os.path.normpath(os.path.join(snakeDir, 'conda'))
 snakeDefaults = (
     '--rerun-incomplete '
     '--printshellcmds '
@@ -38,7 +38,7 @@ snakeDefaults = (
     '--show-failed-logs '
     '--use-conda '
     '--conda-frontend {{ cookiecutter.conda_frontend }} '
-    f'--conda-prefix {CONDDIR} ')
+    f'--conda-prefix {condaDir} ')
 
 
 """PARSE ARGUMENTS
@@ -106,7 +106,7 @@ We get the other files we need by their relative locations to this script.
 OUTDIR = os.path.normpath(args.outdir)
 if not os.path.exists(OUTDIR):
     os.makedirs(OUTDIR)
-templateConfig = os.path.normpath(os.path.join(BINDIR, '../', 'config', 'config.yaml'))
+templateConfig = os.path.normpath(os.path.join(binDir, '../', 'config', 'config.yaml'))
 
 
 """FUNCTIONS
@@ -228,7 +228,7 @@ def install():
     """
     snakeCommand = initialiseSnakeCommand()
     msg("Checking and installing databases and/or dependencies for {{ cookiecutter.project_name }}")
-    snekFile = os.path.normpath(os.path.join(SNEKDIR, 'install.smk'))
+    snekFile = os.path.normpath(os.path.join(snakeDir, 'install.smk'))
     runCommand = f'{snakeCommand} -s {snekFile}'
     runSnakeSys(runCommand)
     return None
@@ -241,7 +241,7 @@ def run():
     """
     snakeCommand = initialiseSnakeCommand()
     msg("Running {{ cookiecutter.project_name }}")
-    snekFile = os.path.normpath(os.path.join(SNEKDIR, 'run.smk'))
+    snekFile = os.path.normpath(os.path.join(snakeDir, 'run.smk'))
     runCommand = (f'{snakeCommand} -s {snekFile} ')
     runSnakeSys(runCommand)
     return None
@@ -253,7 +253,7 @@ def testRun():
     :return: None
     """
     msg('Running the test dataset')
-    args.infile = os.path.normpath(os.path.join(BINDIR, '../', 'test', 'test.fasta'))
+    args.infile = os.path.normpath(os.path.join(binDir, '../', 'test', 'test.fasta'))
     run()
     return None
 
