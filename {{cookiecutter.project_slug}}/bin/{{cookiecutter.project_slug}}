@@ -169,7 +169,7 @@ def writeConfig(_config):
     :return: runtime config file name
     """
     confidMd5 = hashlib.md5(yaml.dump(_config, sort_keys=True).encode('utf-8')).hexdigest()
-    runtimeConfigName = 'infer_codons.' + confidMd5 + '.yaml'
+    runtimeConfigName = '{{ cookiecutter.project_slug }}.' + confidMd5 + '.yaml'
     runtimeConfig = os.path.normpath(os.path.join(OUTDIR, runtimeConfigName))
     msg(f'Writing runtime config file to {runtimeConfig}.')
     with open(runtimeConfig, 'w') as stream:
