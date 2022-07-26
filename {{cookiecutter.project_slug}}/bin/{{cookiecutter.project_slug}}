@@ -147,7 +147,7 @@ def copyConfig():
         msg(f'Copying template config file to {args.configfile}')
         copyfile(templateConfig, args.configfile)
     else:
-        msg(f'Config file {args.configfile} already exists. Using existing config template.')
+        msg(f'Config file {args.configfile} already exists. Using existing config template')
     return None
 
 
@@ -168,10 +168,10 @@ def writeConfig(_config):
     :param _config: updated configuration to write
     :return: runtime config file name
     """
-    confidMd5 = hashlib.md5(yaml.dump(_config, sort_keys=True).encode('utf-8')).hexdigest()
-    runtimeConfigName = 'infer_codons.' + confidMd5 + '.yaml'
+    configMd5 = hashlib.md5(yaml.dump(_config, sort_keys=True).encode('utf-8')).hexdigest()
+    runtimeConfigName = '{{cookiecutter.project_slug}}.' + configMd5 + '.yaml'
     runtimeConfig = os.path.normpath(os.path.join(OUTDIR, runtimeConfigName))
-    msg(f'Writing runtime config file to {runtimeConfig}.')
+    msg(f'Writing runtime config file to {runtimeConfig}')
     with open(runtimeConfig, 'w') as stream:
         yaml.dump(_config, stream)
     msgBox('Runtime config settings', yaml.dump(_config, Dumper=yaml.Dumper))
