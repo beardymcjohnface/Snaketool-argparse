@@ -253,7 +253,7 @@ def testRun():
     :return: None
     """
     msg('Running the test dataset')
-    args.infile = os.path.normpath(os.path.join(BINDIR, '../', '{{cookiecutter.project_slug}}', 'test', 'test.fasta'))
+    args.infile = os.path.normpath(os.path.join(BINDIR, '../', '{{cookiecutter.project_slug}}.workflow', 'test', 'test.fasta'))
     run()
     return None
 
