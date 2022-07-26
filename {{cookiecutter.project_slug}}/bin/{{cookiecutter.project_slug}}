@@ -17,11 +17,11 @@ from time import localtime, strftime
 
 
 
-"""{{cookiecutter.profile_slug}}.VERSION
+"""{{cookiecutter.project_slug}}.VERSION
 Read the version for printing.
 """
 BINDIR = os.path.dirname(os.path.realpath(__file__))
-vFH = open(os.path.normpath(os.path.join(BINDIR, '../', '{{cookiecutter.profile_slug}}.VERSION')), 'r')
+vFH = open(os.path.normpath(os.path.join(BINDIR, '../', '{{cookiecutter.project_slug}}.VERSION')), 'r')
 VERSION = vFH.readline()
 vFH.close()
 
