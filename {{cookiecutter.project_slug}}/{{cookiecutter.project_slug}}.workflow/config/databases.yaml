@@ -1,0 +1,5 @@
+# config settings the user is NOT allowed to touch go in separate files
+# this example is for managing installation of database files
+mirror: https://hecatombdatabases.s3.us-west-2.amazonaws.com/databases/
+databaseFiles:
+ - cntaminants/nebnext_adapters.fa

@@ -38,7 +38,8 @@ my_snaketool/
 │       ├── build.sh
 │       └── meta.yaml
 ├── config
-│   └── config.yaml
+│   ├── config.yaml
+│   └── databases.yaml
 ├── test
 │   ├── README.md
 │   └── test.fasta
@@ -60,6 +61,7 @@ my_snaketool/
 ├── README.md
 ├── requirements.txt
 └── VERSION
+
 
 ```
 

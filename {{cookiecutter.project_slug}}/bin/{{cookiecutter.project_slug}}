@@ -17,11 +17,11 @@ from time import localtime, strftime
 
 
 
-"""VERSION
+"""{{cookiecutter.profile_slug}}.VERSION
 Read the version for printing.
 """
 BINDIR = os.path.dirname(os.path.realpath(__file__))
-vFH = open(os.path.normpath(os.path.join(BINDIR, '../', 'VERSION')), 'r')
+vFH = open(os.path.normpath(os.path.join(BINDIR, '../', '{{cookiecutter.profile_slug}}.VERSION')), 'r')
 VERSION = vFH.readline()
 vFH.close()
 
@@ -29,7 +29,7 @@ vFH.close()
 """CONDA PREFIX
 Need to define the directory for installing conda envs before adding args.
 """
-SNEKDIR = os.path.normpath(os.path.join(BINDIR, '../', 'workflow'))
+SNEKDIR = os.path.normpath(os.path.join(BINDIR, '../', '{{cookiecutter.project_slug}}.workflow'))
 CONDDIR = os.path.normpath(os.path.join(SNEKDIR, 'conda'))
 snakeDefaults = (
     '--rerun-incomplete '
@@ -83,7 +83,7 @@ You should keep --profile, --threads, --configfile, and --snake to make the most
 --snakemake-defaults lets the user override the default Snakemake options if they're feeling brave.
 """
 parser.add_argument('command', choices=['run', 'install', 'config', 'test'])
-parser.add_argument('--infile', help='Input file required for {{ cookiecutter.project_name }}')
+parser.add_argument('--infile', help='Input file required for {{ cookiecutter.project_slug }}')
 parser.add_argument('--outdir', help='Directory to write the output files', default='output_{{ cookiecutter.project_slug }}')
 parser.add_argument('--profile', help='Snakemake profile for use on HPC cluster')
 parser.add_argument('--threads', help='Number of threads to use (ignored if using --profile)', default='8')
@@ -106,7 +106,7 @@ We get the other files we need by their relative locations to this script.
 OUTDIR = os.path.normpath(args.outdir)
 if not os.path.exists(OUTDIR):
     os.makedirs(OUTDIR)
-templateConfig = os.path.normpath(os.path.join(BINDIR, '../', 'config', 'config.yaml'))
+templateConfig = os.path.normpath(os.path.join(BINDIR, '../', '{{cookiecutter.project_slug}}.workflow', 'config', 'config.yaml'))
 
 
 """FUNCTIONS
@@ -253,7 +253,7 @@ def testRun():
     :return: None
     """
     msg('Running the test dataset')
-    args.infile = os.path.normpath(os.path.join(BINDIR, '../', 'test', 'test.fasta'))
+    args.infile = os.path.normpath(os.path.join(BINDIR, '../', '{{cookiecutter.project_slug}}', 'test', 'test.fasta'))
     run()
     return None
 

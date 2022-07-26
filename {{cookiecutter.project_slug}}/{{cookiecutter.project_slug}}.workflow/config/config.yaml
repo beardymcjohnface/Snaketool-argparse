@@ -1,2 +1,3 @@
+# config settings the user is allowed to tweak
 infile:
 outdir: "output_{{ cookiecutter.project_slug }}"

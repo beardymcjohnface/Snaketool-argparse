@@ -8,9 +8,11 @@ This is the main Snakemake pipeline file.
 """
 
 """CONFIGFILE
-Read in the system configfile is useful to fill in anything the user has accidentally deleted.
+Read in the system default configfile is useful to fill in anything the user has accidentally deleted.
+Read in other config files that contain immutable settings that the user is NOT allowed to change.
 """
-configfile: os.path.join(workflow.basedir, "../", "config", "config.yaml")
+configfile: os.path.join(workflow.basedir, "config", "config.yaml")
+configfile: os.path.join(workflow.basedir, "config", "databases.yaml")
 
 
 """ADD FUNCTIONS
