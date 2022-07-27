@@ -1,6 +1,8 @@
 # Snaketool
 Cookiecutter profile for making a Snakemake-based bioinformatics tool
 
+__See also a better, pip installable version using Click: [Snaketool-lite](https://github.com/beardymcjohnface/Snaketool-lite)__
+
 ## Motivation
 
 Snakemake pipelines are excellent.
