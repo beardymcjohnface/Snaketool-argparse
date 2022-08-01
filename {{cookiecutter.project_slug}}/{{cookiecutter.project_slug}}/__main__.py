@@ -68,15 +68,7 @@ def write_config(_config, file):
 
 def parseArgs():
     print_version()
-    CONDDIR = snake_base(os.path.join('workflow', 'conda'))
-    snakeDefaults = (
-        '--rerun-incomplete '
-        '--printshellcmds '
-        '--nolock '
-        '--show-failed-logs '
-        '--use-conda '
-        '--conda-frontend {{ cookiecutter.conda_frontend }} '
-        f'--conda-prefix {CONDDIR} ')
+    snakeDefaults = ['--rerun-incomplete', '--printshellcmds ', '--nolock ', '--show-failed-logs ']
 
 
     """Customise your help message!"""
@@ -124,8 +116,14 @@ def parseArgs():
     parser.add_argument('--configfile',
                         help='Specify a config file. (default {{ cookiecutter.project_slug }}.config.yaml)',
                         default='{{ cookiecutter.project_slug }}.config.yaml')
+    parser.add_argument('--use-conda', action='store_const', const=True, default=True, help='Use conda for Snakemake rules', dest='use_conda')
+    parser.add_argument('--no-use-conda', help='Do not use conda for Snakemake rules', action='store_const', const=True, dest='use_conda')
+    parser.add_argument('--conda-frontend', choices=['mamba', 'conda'], dest='conda_frontend',
+                         default='{{cookiecutter.conda_frontend}}', help='Specify Conda frontend')
+    parser.add_argument('--conda-prefix', default=snake_base(os.path.join('workflow', 'conda')),
+                        dest='conda_prefix', help='Custom conda env directory')
     parser.add_argument('--snake-default',
-                        help=f'Commandline options passed by default to Snakemake. (default {snakeDefaults})',
+                        help=f'Commandline options passed by default to Snakemake. (default {" ".join(snakeDefaults)})',
                         default=snakeDefaults)
     parser.add_argument('--snake',
                         help='Pass additional commands to Snakemake e.g. --snake=--dry-run --snake=--forceall',
@@ -164,9 +162,9 @@ def run_snakemake(configfile=None, snakefile_path=None, merge_config={}, profile
 
     # either use -j [threads] or --profile [profile]
     if profile:
-        snake_command = snake_command + f'--profile {profile}'
+        snake_command = snake_command + f'--profile {profile} '
     else:
-        snake_command = snake_command + f'-j {threads}'
+        snake_command = snake_command + f'-j {threads} '
 
     # add conda args if using conda
     if use_conda:
@@ -174,7 +172,7 @@ def run_snakemake(configfile=None, snakefile_path=None, merge_config={}, profile
 
     # add snakemake default args
     if snake_default_args:
-        snake_command = snake_command + ' '.join(s for s in snake_default_args)
+        snake_command = snake_command + ' '.join(s for s in snake_default_args) + ' '
 
     # add any additional snakemake commands
     if snake_extra:
@@ -207,7 +205,7 @@ def run(args):
     run_snakemake(
         snakefile_path=snake_base(os.path.join('workflow', 'run.smk')),
         configfile=args.configfile,
-        outdir=args.output,
+        outdir=args.outdir,
         merge_config=merge_config,
         threads=args.threads,
         profile=args.profile,
