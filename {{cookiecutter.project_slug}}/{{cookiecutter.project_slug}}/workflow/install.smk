@@ -9,8 +9,8 @@ This is an auxiliary Snakefile to install databases or dependencies.
 
 
 """CONFIGURATION"""
-configfile: os.path.join(workflow.basedir, 'config', 'config.yaml')
-configfile: os.path.join(workflow.basedir, 'config', 'databases.yaml')
+configfile: os.path.join(workflow.basedir, '..', 'config', 'config.yaml')
+configfile: os.path.join(workflow.basedir, '..', 'config', 'databases.yaml')
 
 
 """CHECK IF CUSTOM DATABASE DIRECTORY"""
