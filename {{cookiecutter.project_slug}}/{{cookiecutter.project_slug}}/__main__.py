@@ -63,79 +63,10 @@ def write_config(_config, file):
         yaml.dump(_config, stream)
 
 
-"""Customise your argparse arguments!"""
-
-
-def parseArgs():
-    print_version()
-    snakeDefaults = ['--rerun-incomplete', '--printshellcmds ', '--nolock ', '--show-failed-logs ']
-
-
-    """Customise your help message!"""
-
-
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=("\n"
-                     "Subcommands:\n"
-                     "    run         Run {{ cookiecutter.project_name }}\n"
-                     "    install     Download and install the databases or dependencies\n"
-                     "    config      Copy the default configfile to the current directory\n"
-                     "    test        Run the test dataset\n"
-                     "\n"),
-        epilog=  ("Example usage: \n"
-                 "To Run {{ cookiecutter.project_name }}:\n"
-                 "{{ cookiecutter.project_slug }} run --infile file\n"
-                 "\n"
-                 "Run on a cluster:\n"
-                 "{{ cookiecutter.project_slug }} run --infile file --profile slurm\n"
-                 "\n"
-                 "Copy the default config to customise your analysis:\n"
-                 "{{ cookiecutter.project_slug }} config \n"
-                 "\n"
-                 "Install databases/dependencies:\n"
-                 "{{ cookiecutter.project_slug }} install \n"
-                 "\n"
-                 "Run the test dataset:\n"
-                 "{{ cookiecutter.project_slug }} test \n"
-                 "\n")
-    )
-
-
-    """COMMAND LINE OPTIONS
-    --infile and --outdir are simply passed as config options verbatim to Snakemake.
-    You should keep --profile, --threads, --configfile, and --snake to make the most out of Snakemake.
-    --snake-default lets the user override the default Snakemake options if they're feeling brave."""
-
-
-    parser.add_argument('command', choices=['run', 'install', 'config', 'test'])
-    parser.add_argument('--infile', help='Input file required for {{ cookiecutter.project_slug }}')
-    parser.add_argument('--outdir', help='Directory to write the output files', default='output_{{ cookiecutter.project_slug }}')
-    parser.add_argument('--profile', help='Snakemake profile for use on HPC cluster')
-    parser.add_argument('--threads', help='Number of threads to use (ignored if using --profile)', default='8')
-    parser.add_argument('--configfile',
-                        help='Specify a config file. (default {{ cookiecutter.project_slug }}.config.yaml)',
-                        default='{{ cookiecutter.project_slug }}.config.yaml')
-    parser.add_argument('--use-conda', action='store_const', const=True, default=True, help='Use conda for Snakemake rules', dest='use_conda')
-    parser.add_argument('--no-use-conda', help='Do not use conda for Snakemake rules', action='store_const', const=True, dest='use_conda')
-    parser.add_argument('--conda-frontend', choices=['mamba', 'conda'], dest='conda_frontend',
-                         default='{{cookiecutter.conda_frontend}}', help='Specify Conda frontend')
-    parser.add_argument('--conda-prefix', default=snake_base(os.path.join('workflow', 'conda')),
-                        dest='conda_prefix', help='Custom conda env directory')
-    parser.add_argument('--snake-default',
-                        help=f'Commandline options passed by default to Snakemake. (default {" ".join(snakeDefaults)})',
-                        default=snakeDefaults)
-    parser.add_argument('--snake',
-                        help='Pass additional commands to Snakemake e.g. --snake=--dry-run --snake=--forceall',
-                        action='append')
-    args = parser.parse_args()
-    return args
-
-
 def run_snakemake(configfile=None, snakefile_path=None, merge_config={}, profile=None, threads=1, use_conda=False,
                   conda_frontend=None, conda_prefix=None, outdir='{{cookiecutter.project_slug}}.out',
                   snake_default_args=None, snake_extra=[]):
-    """Run a Snakefile"""
+    """Generic function to run a Snakefile"""
     snake_command = f'snakemake -s {snakefile_path} '
 
     # if using a configfile
@@ -188,6 +119,70 @@ def run_snakemake(configfile=None, snakefile_path=None, merge_config={}, profile
     return 0
 
 
+"""Customise your argparse arguments!"""
+
+
+def parseArgs():
+    print_version()
+    snakeDefaults = ['--rerun-incomplete', '--printshellcmds ', '--nolock ', '--show-failed-logs ']
+
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=("\n"
+                     "Subcommands:\n"
+                     "    run         Run {{ cookiecutter.project_name }}\n"
+                     "    install     Download and install the databases or dependencies\n"
+                     "    config      Copy the default configfile to the current directory\n"
+                     "    test        Run the test dataset\n"
+                     "\n"),
+        epilog=  ("Example usage: \n"
+                 "To Run {{ cookiecutter.project_name }}:\n"
+                 "{{ cookiecutter.project_slug }} run --infile file\n"
+                 "\n"
+                 "Run on a cluster:\n"
+                 "{{ cookiecutter.project_slug }} run --infile file --profile slurm\n"
+                 "\n"
+                 "Copy the default config to customise your analysis:\n"
+                 "{{ cookiecutter.project_slug }} config \n"
+                 "\n"
+                 "Install databases/dependencies:\n"
+                 "{{ cookiecutter.project_slug }} install \n"
+                 "\n"
+                 "Run the test dataset:\n"
+                 "{{ cookiecutter.project_slug }} test \n"
+                 "\n")
+    )
+
+    parser.add_argument('command', choices=['run', 'install', 'config', 'test'])
+    # --infile and --outdir are simply passed as config options verbatim to Snakemake.
+    parser.add_argument('--infile', help='Input file required for {{ cookiecutter.project_slug }}')
+    parser.add_argument('--outdir', help='Directory to write the output files', default='output_{{ cookiecutter.project_slug }}')
+    # You should keep --profile, --threads, --configfile, --snake, and the --conda options to make the most out of Snakemake.
+    parser.add_argument('--profile', help='Snakemake profile for use on HPC cluster')
+    parser.add_argument('--threads', help='Number of threads to use (ignored if using --profile)', default='8')
+    parser.add_argument('--configfile',
+                        help='Specify a config file. (default {{ cookiecutter.project_slug }}.config.yaml)',
+                        default='{{ cookiecutter.project_slug }}.config.yaml')
+    parser.add_argument('--use-conda', action='store_const', const=True, default=True, help='Use conda for Snakemake rules', dest='use_conda')
+    parser.add_argument('--no-use-conda', help='Do not use conda for Snakemake rules', action='store_const', const=True, dest='use_conda')
+    parser.add_argument('--conda-frontend', choices=['mamba', 'conda'], dest='conda_frontend',
+                         default='{{cookiecutter.conda_frontend}}', help='Specify Conda frontend')
+    parser.add_argument('--conda-prefix', default=snake_base(os.path.join('workflow', 'conda')),
+                        dest='conda_prefix', help='Custom conda env directory')
+    # --snake-default lets the user override the default Snakemake options if they're feeling brave
+    parser.add_argument('--snake-default',
+                        help=f'Commandline options passed by default to Snakemake. (default {" ".join(snakeDefaults)})',
+                        default=snakeDefaults)
+    parser.add_argument('--snake',
+                        help='Pass additional commands to Snakemake e.g. --snake=--dry-run --snake=--forceall',
+                        action='append')
+    args = parser.parse_args()
+    return args
+
+
+"""SUB-COMMAND FUNCTIONS"""
+
+
 def install(args):
     """The install function. This will run the install.smk snakemake pipeline."""
     run_snakemake(
@@ -199,22 +194,25 @@ def install(args):
 
 def run(args):
     """Run {{cookiecutter.project_name}}!"""
-    merge_config = {'infile': args.infile}
+    if not args.infile:
+        msg('Error: --infile is required')
+        exit(1)
+    else:
+        merge_config = {'infile': args.infile}
 
-    # run!
-    run_snakemake(
-        snakefile_path=snake_base(os.path.join('workflow', 'run.smk')),
-        configfile=args.configfile,
-        outdir=args.outdir,
-        merge_config=merge_config,
-        threads=args.threads,
-        profile=args.profile,
-        use_conda=args.use_conda,
-        conda_frontend=args.conda_frontend,
-        conda_prefix=args.conda_prefix,
-        snake_default_args=args.snake_default,
-        snake_extra=args.snake,
-    )
+        run_snakemake(
+            snakefile_path=snake_base(os.path.join('workflow', 'run.smk')),
+            configfile=args.configfile,
+            outdir=args.outdir,
+            merge_config=merge_config,
+            threads=args.threads,
+            profile=args.profile,
+            use_conda=args.use_conda,
+            conda_frontend=args.conda_frontend,
+            conda_prefix=args.conda_prefix,
+            snake_default_args=args.snake_default,
+            snake_extra=args.snake,
+        )
 
 
 def testRun(args):
