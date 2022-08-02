@@ -32,62 +32,56 @@ cookiecutter https://github.com/beardymcjohnface/Snaketool.git
 And here's what you get:
 
 ```text
-my_snaketool/
-├── bin
-│   └── my_snaketool
-├── build
-│   └── my_snaketool
-│       ├── build.sh
-│       └── meta.yaml
-├── config
-│   ├── config.yaml
-│   └── databases.yaml
-├── test
-│   ├── README.md
-│   └── test.fasta
-├── workflow
-│   ├── envs
-│   │   └── samtools.yaml
-│   ├── rules
-│   │   ├── 0.functions.smk
-│   │   ├── 1.preflight.smk
-│   │   ├── 2.targets.smk
-│   │   └── 3.rules.smk
-│   ├── scripts
-│   │   └── myScript.py
-│   ├── install.smk
-│   └── run.smk
+snaketool/
 ├── AUTHORS.md
 ├── CHANGELOG.md
-├── LICENCE
 ├── README.md
-├── requirements.txt
-└── VERSION
-
+├── setup.py
+└── snaketool
+    ├── config
+    │   ├── config.yaml
+    │   └── databases.yaml
+    ├── __init__.py
+    ├── __main__.py
+    ├── snaketool.LICENSE
+    ├── snaketool.VERSION
+    └── workflow
+        ├── envs
+        │   └── samtools.yaml
+        ├── install.smk
+        ├── rules
+        │   ├── 0.functions.smk
+        │   ├── 1.preflight.smk
+        │   ├── 2.targets.smk
+        │   └── 3.rules.smk
+        ├── run.smk
+        ├── scripts
+        │   └── myScript.py
+        └── test
+            ├── README.md
+            └── test.fasta
 
 ```
 
-The file `bin/my_snaketool` is the convenience launcher (or whatever you called it).
+The file `__main__.py` is the entry point.
+Once installed with pip in this example it will be accessible on command line as `snaketool`.
 Customise this file to add your own commandline options, help message, utility scripts etc.
 
-The directories `config/` and `workflow/` contain an example Snakemake pipeline that will work
-with the example launcher. There are helpful comments throughout these files.
+The directories `config/` and `workflow/` contain an example Snakemake pipeline that will work with the example launcher.
+Feel free to adapt the workflow, or delete and remake.
 
-## Installing your tool
+## Installing and testing your tool
 
-For development, install the dependencies in `requirements.txt` with conda.
-Then, __softlink__ the convenience launcher to your system PATH, or add the `bin/` to your PATH.
-That's it!
+For development, cd to your Snaketool directory and install with pip:
+
+```shell
+cd snaketool/
+pip install -e .
+snaketool -h
+```
 
 ## Publishing your tool
 
-For deployment and publishing, add the tool to bioconda or an appropriate channel, 
-or even your own channel.
+Add your tool to pip and bioconda.
+Instructions TBA, watch this space!
 
-The directory `build/` contains the files needed to build and submit the tool as a conda package.
-You __may__ need to tweak the requirements etc. 
-You __will__ need to first create a release on GitHub to match the version number in `meta.yaml`
-(prepend with a 'v', e.g. GitHub tag is 'v0.1.0' for version '0.1.0'). 
-Then, download the 'tar.gz' archive for the tag, calculate the sha256 checksum and paste it the `meta.yaml` file.
-Finally, build the conda package and add it to your channel, 
-or add it to bioconda-recipes or a suitable channel.
