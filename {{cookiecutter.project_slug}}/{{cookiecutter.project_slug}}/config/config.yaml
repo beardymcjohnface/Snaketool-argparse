@@ -1,4 +1,4 @@
 # config settings the user is allowed to tweak
-infile:
-outdir: "output_{{ cookiecutter.project_slug }}"
+input:
+output: "output_{{ cookiecutter.project_slug }}"
 customDatabaseDirectory:

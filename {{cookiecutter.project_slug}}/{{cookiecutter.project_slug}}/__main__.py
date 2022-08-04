@@ -143,10 +143,10 @@ def parseArgs():
                      "\n"),
         epilog=  ("Example usage: \n"
                  "To Run {{ cookiecutter.project_name }}:\n"
-                 "{{ cookiecutter.project_slug }} run --infile file\n"
+                 "{{ cookiecutter.project_slug }} run --input file\n"
                  "\n"
                  "Run on a cluster:\n"
-                 "{{ cookiecutter.project_slug }} run --infile file --profile slurm\n"
+                 "{{ cookiecutter.project_slug }} run --input file --profile slurm\n"
                  "\n"
                  "Copy the default config to customise your analysis:\n"
                  "{{ cookiecutter.project_slug }} config \n"
@@ -160,9 +160,9 @@ def parseArgs():
     )
 
     parser.add_argument('command', choices=['run', 'install', 'config', 'test'])
-    # --infile and --outdir are simply passed as config options verbatim to Snakemake.
-    parser.add_argument('--infile', help='Input file required for {{ cookiecutter.project_slug }}')
-    parser.add_argument('--outdir', help='Directory to write the output files', default='output_{{ cookiecutter.project_slug }}')
+    # --input and --output are simply passed as config options verbatim to Snakemake.
+    parser.add_argument('--input', help='Input file required for {{ cookiecutter.project_slug }}')
+    parser.add_argument('--output', help='Directory to write the output files', default='output_{{ cookiecutter.project_slug }}')
     # You should keep --profile, --threads, --configfile, --snake, and the --conda options to make the most out of Snakemake.
     parser.add_argument('--profile', help='Snakemake profile for use on HPC cluster')
     parser.add_argument('--threads', help='Number of threads to use (ignored if using --profile)', default='8')
@@ -200,16 +200,19 @@ def install(args):
 
 def run(args):
     """Run {{cookiecutter.project_name}}!"""
-    if not args.infile:
-        msg('Error: --infile is required')
+    if not args.input:
+        msg('Error: --input is required')
         exit(1)
     else:
-        merge_config = {'infile': args.infile}
+        merge_config = {
+            'input': args.input,
+            'output': args.output
+        }
 
         run_snakemake(
             snakefile_path=snake_base(os.path.join('workflow', 'run.smk')),
             configfile=args.configfile,
-            outdir=args.outdir,
+            outdir=args.output,
             merge_config=merge_config,
             threads=args.threads,
             profile=args.profile,
@@ -224,7 +227,7 @@ def run(args):
 def testRun(args):
     """Run the test dataset"""
     msg('Running the test dataset')
-    args.infile = os.path.normpath(snake_base(os.path.join('workflow', 'test', 'test.fasta')))
+    args.input = os.path.normpath(snake_base(os.path.join('workflow', 'test', 'test.fasta')))
     run(args)
     return None
 
