@@ -101,7 +101,7 @@ def run_snakemake(configfile=None, snakefile_path=None, merge_config=None, profi
 
     # add conda args if using conda
     if use_conda:
-        snake_command += '--use-conda'
+        snake_command += ['--use-conda']
         if conda_frontend:
             snake_command += ['--conda-frontend', conda_frontend]
         if conda_prefix:
@@ -116,9 +116,9 @@ def run_snakemake(configfile=None, snakefile_path=None, merge_config=None, profi
         snake_command += snake_extra
 
     # Run Snakemake!!!
-    snake_command = list(map(str,snake_command))
-    msg_box('Snakemake command', errmsg=' '.join(snake_command))
-    if not subprocess.run(snake_command).returncode == 0:
+    snake_command = ' '.join(str(s) for s in snake_command)
+    msg_box('Snakemake command', errmsg=snake_command)
+    if not subprocess.run(snake_command, shell=True).returncode == 0:
         msg('Error: Snakemake failed')
         sys.exit(1)
     else:

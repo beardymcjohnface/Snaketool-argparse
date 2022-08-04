@@ -7,8 +7,8 @@ e.g. Configure the run, declare directories, validate the input files etc.
 """CONFIGURATION
 parsing the config to variables is not necessary, but it looks neater than typing out config["someParam"] every time.
 """
-inputFile = config["infile"]
-outputDir = config["outdir"]
+inputFile = config["input"]
+outputDir = config["output"]
 
 
 """DIRECTORIES/FILES etc.
